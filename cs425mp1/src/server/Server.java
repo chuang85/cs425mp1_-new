@@ -36,17 +36,12 @@ public class Server implements Runnable {
 		for (int j = 1; j < Main.proc_num + 1; j++) {
 			for (int k = 1; k < Main.proc_num + 1; k++) {
 				if (j != k) {
-
-					while (Main.channel[j][k].messageQueue.poll() != null) {
-
-					}
 					Main.channel[j][k].turnOffRecord();
-					Main.channel[j][k].hasPrintOff();
 				}
 			}
 		}
 	}
-	
+
 	public void sendMarker(int sequenceNum, int from) {
 		for (int i = 1; i < Main.proc_num + 1; i++) {
 			if (i != from) {
@@ -117,21 +112,17 @@ public class Server implements Runnable {
 		Main.channel = new Channel[Main.proc_num + 1][Main.proc_num + 1];
 		for (int j = 1; j < Main.proc_num + 1; j++) {
 			for (int k = 1; k < Main.proc_num + 1; k++) {
-			//	if (j != k) {
-					Main.channel[j][k] = new Channel(j, k);
-			//	}
+				Main.channel[j][k] = new Channel(j, k);
 			}
 		}
 
-		total_marker = Main.proc_num * (Main.proc_num - 1)+1;
+		total_marker = Main.proc_num * (Main.proc_num - 1) + 1;
 		// listen on clients
 		Message agent;
 		while (true) {
 			// enqueue all the messages and markers, and put marker into channel
 			for (int j = 1; j < Main.proc_num + 1; j++) {
 				try {
-					// agent = (RegularMessage) is[j].readObject();
-					// message_queue.add((RegularMessage) agent);
 					agent = (Message) is[j].readObject();
 					message_queue.add(agent);
 				} catch (ClassNotFoundException e) {
@@ -151,50 +142,49 @@ public class Server implements Runnable {
 					System.out.println(String.format(
 							"P%d receiving marker from P%d", agent.to,
 							agent.from));
-					
-					//////////////////////////////////////////////////stop send messages while recording state
-					
-					
-					
+
+					// ////////////////////////////////////////////////stop send
+					// messages while recording state
+
 					// p has not recorded its state yet
 					if (Main.p[agent.to].hasRecordedState == false) {
 						synchronized (this) {
-						try {
-							Main.p[agent.to].sendThread.suspend();
-							Main.p[agent.to].recordProcessState();
-							// TODO record it process state now
-							Main.p[agent.to].hasRecordedState = true;
-							System.out.println(String.format(
-									"P%d has recorded state", agent.to))
-									;
-							for (int j = 2; j < Main.proc_num + 1; j++) {
-								if ((j != agent.to) && (j != agent.from)) {
-									Main.channel[j][agent.to].turnOnRecord();
-									System.out.println(String.format(
-											"C%d%d is turned on", j, agent.to));
+							try {
+								Main.p[agent.to].sendThread.suspend();
+								Main.p[agent.to].recordProcessState();
+								// TODO record it process state now
+								Main.p[agent.to].hasRecordedState = true;
+								System.out.println(String.format(
+										"P%d has recorded state", agent.to));
+								for (int j = 2; j < Main.proc_num + 1; j++) {
+									if ((j != agent.to) && (j != agent.from)) {
+										Main.channel[j][agent.to]
+												.turnOnRecord();
+										System.out.println(String.format(
+												"C%d%d is turned on", j,
+												agent.to));
+									}
 								}
+								sendMarker(Main.sequence_num, agent.to);
+								Main.p[agent.to].sendThread.resume();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
-							sendMarker(Main.sequence_num,agent.to);
-							Main.p[agent.to].sendThread.resume();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
 						}
-						}
-						
+
 						// turns on recording of messages arrving over other
 						// incoming channels
-						
-						
 
 					} else {
 						Main.channel[agent.from][agent.to].turnOffRecord();
-						Main.channel[agent.from][agent.to].hasPrintOn();
 						while (Main.channel[agent.from][agent.to].messageQueue
 								.peek() != null) {
 							RegularMessage rm = (RegularMessage) Main.channel[agent.from][agent.to].messageQueue
 									.poll();
-							System.out.println(String.format("C%d%d has recorded state", agent.from, agent.to));
+							System.out.println(String.format(
+									"C%d%d has recorded state", agent.from,
+									agent.to));
 							synchronized (this) {
 								String content = String
 										.format("id %d : snapshot %d : message %d to %d : money %d widgets %d",

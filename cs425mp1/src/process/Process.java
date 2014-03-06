@@ -88,12 +88,7 @@ public class Process implements Runnable {
 		RegularMessage my_m;
 		while (true) {
 			try {
-				
 					my_m = (RegularMessage) client.is.readObject();
-				// System.out.println(String.format(
-				// "Process %d said: Receive msg from %d, content: %s",
-				// id, my_m.getFrom(), my_m.testStr));
-				// System.out.println("money " + my_m.money);
 				synchronized (this) 
 				{
 					money += my_m.money;
@@ -114,7 +109,7 @@ public class Process implements Runnable {
 		}
 		// use this client to communicate with server
 		client = new Client("localhost", Main.port_num);
-		try {
+		try {	
 			id = client.getID();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();

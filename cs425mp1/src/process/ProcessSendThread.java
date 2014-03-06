@@ -101,7 +101,7 @@ public class ProcessSendThread implements Runnable {
 				try {
 					os.writeObject((Message) m);
 					System.out.println(String.format(
-							"P%d is sending marker to P%d", 0, 1));
+							"P%d is sending marker to P%d", 1, 1));
 					os.flush();
 				} catch (IOException e) {
 					System.out.println(e);
