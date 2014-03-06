@@ -1,0 +1,2 @@
+id 4 : snapshot 1 : message 3 to 4 : money 1 widgets 2
+id 4 : snapshot 2 : message 3 to 4 : money 1 widgets 2
