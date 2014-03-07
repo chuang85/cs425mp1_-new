@@ -1,1 +1,0 @@
-id 2 : snapshot 3 : logical 99 : vector 1 71 1 1 : message 1 to 2 : money 0 widgets 0
