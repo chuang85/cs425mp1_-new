@@ -55,8 +55,24 @@ public class Server implements Runnable {
 		}
 	}
 
+	public void init_stamp()
+	{
+		for(int j = 1; j < Main.proc_num+1; j++)
+		{
+			Main.lambo[j] = 0;
+			for(int k = 1; k < Main.proc_num+1; k++)
+			{
+				Main.vector[j][k] = 0;
+			}
+		}
+	}
+	
 	@Override
 	public void run() {
+		
+
+		init_stamp();
+		
 		// init the client socket array and is os array
 		clientSocket = new Socket[Main.proc_num + 1];
 		is = new ObjectInputStream[Main.proc_num + 1];
@@ -67,7 +83,8 @@ public class Server implements Runnable {
 		} catch (IOException e) {
 			System.out.println(e);
 		}
-
+		
+		
 		// wait for all the clients to connect
 		System.out.println("Waiting for all the clients to connect... \n");
 		int i = 1;
@@ -125,7 +142,20 @@ public class Server implements Runnable {
 					System.out.println(String.format(
 							"P%d receiving marker from P%d", agent.to,
 							agent.from));
-
+					
+					//update timestamp
+					Main.lambo[agent.to] = Math.max(agent.lamboM+1,Main.lambo[agent.to]+1);
+					for(int j = 1; j < Main.proc_num+1; j ++)
+					{
+						if(j != agent.to)
+						{
+							Main.vector[agent.to][j] = Math.max(agent.vectorM[j], Main.vector[agent.to][j]);
+						}	else
+						{
+							Main.vector[agent.to][j] ++;
+						}
+					}
+					
 					// ////////////////////////////////////////////////stop send
 					// messages while recording state
 

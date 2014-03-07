@@ -17,7 +17,9 @@ public class Main {
 	public static Channel[][] channel;
 	public static final String txtDirectory = System.getProperty("user.dir")
 			+ "\\snapshot_result\\";
-
+	public static int[] lambo;
+	public static int[][] vector;
+	
 	public static void main(String args[]) {
 		clearDirectory();
 

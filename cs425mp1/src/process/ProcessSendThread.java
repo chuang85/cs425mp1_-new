@@ -20,22 +20,32 @@ public class ProcessSendThread implements Runnable {
 		this.proc_num = proc_num;
 	}
 
+	
+	
 	public void sendMessage(int widget, int money, int from, int to) {
 
 		RegularMessage test_m = new RegularMessage(widget, money, from, to);
+		Main.lambo[from]+= 1;
+		Main.vector[from][from]++;
+		test_m.lamboM = Main.lambo[from];
+		test_m.vectorM = Main.vector[from];
 		test_m.testStr = "Greetings from process " + id;
 		try {
 			os.writeObject((RegularMessage) test_m);
-			os.flush();
+			// System.out.println(i);
 		} catch (IOException e) {
 			System.out.println(e);
 		}
 	}
 
 	public void sendMarker(int sequenceNum, int from) {
+		Main.lambo[from]+= 1;
+		Main.vector[from][from]++;
 		for (int i = 1; i < Main.proc_num + 1; i++) {
 			if (i != from) {
 				Marker m = new Marker(sequenceNum, from, i);
+				m.lamboM = Main.lambo[from];
+				m.vectorM = Main.vector[from];
 				try {
 					os.writeObject((Message) m);
 					System.out.println(String.format(
@@ -46,7 +56,10 @@ public class ProcessSendThread implements Runnable {
 				}
 			}
 		}
+		
 	}
+	
+	
 
 	@Override
 	public void run() {
@@ -133,7 +146,7 @@ public class ProcessSendThread implements Runnable {
 			if ((rand_num + 1) != id) {
 							
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(5000);
 				} catch (InterruptedException ie) {
 					// Handle exception
 				}
