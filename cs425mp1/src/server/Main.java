@@ -14,10 +14,9 @@ public class Main {
 	public static boolean snapshot_on = false;
 	public static int sequence_num = 1;
 	public static Process[] p;
+	public static Channel[][] channel;
 	public static final String txtDirectory = System.getProperty("user.dir")
 			+ "\\snapshot_result\\";
-
-	public static Channel[][] channel;
 
 	public static void main(String args[]) {
 		clearDirectory();

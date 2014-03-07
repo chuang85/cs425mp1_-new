@@ -27,7 +27,6 @@ public class ProcessSendThread implements Runnable {
 		try {
 			os.writeObject((RegularMessage) test_m);
 			os.flush();
-			// System.out.println(i);
 		} catch (IOException e) {
 			System.out.println(e);
 		}
@@ -47,7 +46,6 @@ public class ProcessSendThread implements Runnable {
 				}
 			}
 		}
-
 	}
 
 	@Override

@@ -1,8 +1,5 @@
 package server;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,10 +7,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import process.Channel;
 import message.Marker;
 import message.Message;
 import message.RegularMessage;
+import process.Channel;
 
 public class Server implements Runnable {
 
@@ -56,12 +53,10 @@ public class Server implements Runnable {
 				}
 			}
 		}
-
 	}
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 		// init the client socket array and is os array
 		clientSocket = new Socket[Main.proc_num + 1];
 		is = new ObjectInputStream[Main.proc_num + 1];
@@ -92,15 +87,6 @@ public class Server implements Runnable {
 			if (i == Main.proc_num + 1)
 				break;
 		}
-
-		// send the snapshot number to process 1
-		try {
-			os[1].writeObject((Integer) Main.snapshot_num);
-			os[1].flush();
-		} catch (IOException e) {
-			System.out.println(e);
-		}
-
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException ie) {
@@ -126,13 +112,10 @@ public class Server implements Runnable {
 					agent = (Message) is[j].readObject();
 					message_queue.add(agent);
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
 			}
 			while (!message_queue.isEmpty()) {
 				agent = message_queue.poll();
@@ -152,7 +135,6 @@ public class Server implements Runnable {
 							try {
 								Main.p[agent.to].sendThread.suspend();
 								Main.p[agent.to].recordProcessState();
-								// TODO record it process state now
 								Main.p[agent.to].hasRecordedState = true;
 								System.out.println(String.format(
 										"P%d has recorded state", agent.to));
@@ -168,51 +150,14 @@ public class Server implements Runnable {
 								sendMarker(Main.sequence_num, agent.to);
 								Main.p[agent.to].sendThread.resume();
 							} catch (IOException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						}
-
 						// turns on recording of messages arrving over other
 						// incoming channels
-
 					} else {
 						Main.channel[agent.from][agent.to].turnOffRecord();
-						while (Main.channel[agent.from][agent.to].messageQueue
-								.peek() != null) {
-							RegularMessage rm = (RegularMessage) Main.channel[agent.from][agent.to].messageQueue
-									.poll();
-							System.out.println(String.format(
-									"C%d%d has recorded state", agent.from,
-									agent.to));
-							synchronized (this) {
-								String content = String
-										.format("id %d : snapshot %d : message %d to %d : money %d widgets %d",
-												agent.to, Main.sequence_num,
-												agent.from, agent.to, rm.money,
-												rm.widget); // TODO ADD
-															// TIMESTAMP
-
-								String filePath = Main.txtDirectory
-										+ "channel_" + agent.from + agent.to
-										+ ".txt";
-								File file = new File(filePath);
-								try {
-									if (!file.exists()) {
-										file.createNewFile();
-									}
-									FileWriter fw = new FileWriter(
-											file.getAbsoluteFile(), true);
-									BufferedWriter bw = new BufferedWriter(fw);
-									bw.write(content);
-									bw.newLine();
-									bw.close();
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							}
-						}
+						Main.channel[agent.from][agent.to].recordChannelState();
 					}
 					total_marker--;
 					// done with one snapshot
@@ -237,15 +182,12 @@ public class Server implements Runnable {
 					try {
 						os[(int) agent.to].writeObject((RegularMessage) agent);
 						os[(int) agent.to].flush();
-						// System.out.println(String.format("Sending msg from %d to %d",
-						// agent.from, agent.to));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
 			}
 		}
-
 	}
 
 }
