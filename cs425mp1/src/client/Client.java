@@ -6,8 +6,6 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import message.RegularMessage;
-
 public class Client {
 	Socket client = null;
 	public ObjectOutputStream os = null;
@@ -38,7 +36,6 @@ public class Client {
 				System.out.println(e);
 			}
 		}
-		System.out.println("This is the process's ID " + id);
 		return id;
 	}
 }

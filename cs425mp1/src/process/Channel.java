@@ -49,9 +49,14 @@ public class Channel {
 			totalMoney += rm.money;
 			totalWidget += rm.widget;
 		}
-		String content = String.format(
-				"id %d : snapshot %d : message %d to %d : money %d widgets %d",
-				to, Main.sequence_num, from, to, totalMoney, totalWidget);
+		String front = String.format("id %d : snapshot %d : logical %d : vector ", to, Main.sequence_num, Main.logical[to]);
+		String mid = "";
+		for (int i = 1; i < Main.proc_num + 1; i++) {
+			mid += String.valueOf(Main.vector[to][i]) + " ";
+		}
+		String back = String.format(": message %d to %d : money %d widgets %d", from, to, totalMoney, totalWidget);
+		String content = front + mid + back;
+	
 		String filePath = Main.txtDirectory + "channel_" + from + to + ".txt";
 		File file = new File(filePath);
 		try {
@@ -64,7 +69,6 @@ public class Channel {
 			bw.newLine();
 			bw.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println(String.format("C%d%d has recorded state", from, to));

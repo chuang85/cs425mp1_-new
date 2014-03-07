@@ -55,24 +55,31 @@ public class Server implements Runnable {
 		}
 	}
 
-	public void init_stamp()
-	{
-		for(int j = 1; j < Main.proc_num+1; j++)
-		{
-			Main.lambo[j] = 0;
-			for(int k = 1; k < Main.proc_num+1; k++)
-			{
+	public void init_stamp() {
+		for (int j = 1; j < Main.proc_num + 1; j++) {
+			Main.logical[j] = 0;
+			for (int k = 1; k < Main.proc_num + 1; k++) {
 				Main.vector[j][k] = 0;
 			}
 		}
 	}
-	
+
+	public void updateTimeStamp(Message m) {
+		Main.logical[m.to] = Math.max(m.logicalM + 1, Main.logical[m.to] + 1);
+		for (int j = 1; j < Main.proc_num + 1; j++) {
+			if (j != m.to) {
+				Main.vector[m.to][j] = Math.max(m.vectorM[j],
+						Main.vector[m.to][j]);
+			} else {
+				Main.vector[m.to][j]++;
+			}
+		}
+	}
+
 	@Override
 	public void run() {
-		
-
 		init_stamp();
-		
+
 		// init the client socket array and is os array
 		clientSocket = new Socket[Main.proc_num + 1];
 		is = new ObjectInputStream[Main.proc_num + 1];
@@ -83,8 +90,7 @@ public class Server implements Runnable {
 		} catch (IOException e) {
 			System.out.println(e);
 		}
-		
-		
+
 		// wait for all the clients to connect
 		System.out.println("Waiting for all the clients to connect... \n");
 		int i = 1;
@@ -142,28 +148,15 @@ public class Server implements Runnable {
 					System.out.println(String.format(
 							"P%d receiving marker from P%d", agent.to,
 							agent.from));
-					
-					//update timestamp
-					Main.lambo[agent.to] = Math.max(agent.lamboM+1,Main.lambo[agent.to]+1);
-					for(int j = 1; j < Main.proc_num+1; j ++)
-					{
-						if(j != agent.to)
-						{
-							Main.vector[agent.to][j] = Math.max(agent.vectorM[j], Main.vector[agent.to][j]);
-						}	else
-						{
-							Main.vector[agent.to][j] ++;
-						}
-					}
-					
-					// ////////////////////////////////////////////////stop send
-					// messages while recording state
 
+					// update timestamp
+					updateTimeStamp(agent);
+
+					// stop send messages while recording state
 					// p has not recorded its state yet
 					if (Main.p[agent.to].hasRecordedState == false) {
 						synchronized (this) {
 							try {
-								Main.p[agent.to].sendThread.suspend();
 								Main.p[agent.to].recordProcessState();
 								Main.p[agent.to].hasRecordedState = true;
 								System.out.println(String.format(
@@ -178,7 +171,6 @@ public class Server implements Runnable {
 									}
 								}
 								sendMarker(Main.sequence_num, agent.to);
-								Main.p[agent.to].sendThread.resume();
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
@@ -192,7 +184,7 @@ public class Server implements Runnable {
 					total_marker--;
 					// done with one snapshot
 					if (total_marker == 0) {
-						System.out.println("This snapshot is done");
+						System.out.println("This snapshot is done\n\n");
 						Main.snapshot_num--;
 						Main.sequence_num++;
 						reset_process();
@@ -219,5 +211,4 @@ public class Server implements Runnable {
 			}
 		}
 	}
-
 }
