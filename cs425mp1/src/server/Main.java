@@ -19,8 +19,9 @@ public class Main {
 			+ "\\snapshot_result\\";
 	public static int[] logical;
 	public static int[][] vector;
-	
+
 	public static void main(String args[]) {
+		createDirectory();
 		clearDirectory();
 
 		Server server = new Server();
@@ -39,9 +40,9 @@ public class Main {
 		System.out.println("Enter the snapshot number : ");
 		snapshot_num = scanner.nextInt();
 		// snapshot_num = snapshot_num;
-		
-		logical = new int[proc_num+1];
-		vector = new int[proc_num+1][proc_num+1];
+
+		logical = new int[proc_num + 1];
+		vector = new int[proc_num + 1][proc_num + 1];
 
 		// the process array, starting from index 1 !!!!!!!!!!!!!!!!!!!!!!
 		p = new Process[proc_num + 1];
@@ -60,6 +61,17 @@ public class Main {
 			}
 		}
 
+	}
+
+	private static void createDirectory() {
+		File theDir = new File("snapshot_result");
+		// if the directory does not exist, create it
+		if (!theDir.exists()) {
+			System.out.println("creating directory: snapshot_result");
+			if (theDir.mkdir()) {
+				System.out.println("snapshot_result created");
+			}
+		}
 	}
 
 	private static void clearDirectory() {
